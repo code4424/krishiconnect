@@ -23,6 +23,8 @@ const envSchema = z.object({
   MAP_API_KEY: z.string().optional(),
   RAZORPAY_KEY_ID: z.string().optional().default(''),
   RAZORPAY_KEY_SECRET: z.string().optional().default(''),
+  SUPABASE_URL: z.string(),
+  SUPABASE_SERVICE_KEY: z.string(),
 });
 
 const _env = envSchema.safeParse(process.env);

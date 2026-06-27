@@ -5,7 +5,28 @@
       "Bash(grep -E \"^.*src/\\(app|server|index\\)\\\\.ts$\")",
       "Bash(xargs ls:*)",
       "Bash(node -e \"const rdp = require\\('react-day-picker'\\); console.log\\(Object.keys\\(rdp\\).filter\\(k => k.includes\\('DayPicker'\\) || k === 'UI'\\).join\\('\\\\n'\\)\\)\")",
-      "Bash(node -e \"const rdp = require\\('react-day-picker'\\); console.log\\(JSON.stringify\\(rdp.UI, null, 2\\)\\)\")"
+      "Bash(node -e \"const rdp = require\\('react-day-picker'\\); console.log\\(JSON.stringify\\(rdp.UI, null, 2\\)\\)\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"which npm && which pnpm 2>/dev/null; which docker 2>/dev/null; which nginx 2>/dev/null; which pm2 2>/dev/null; which git 2>/dev/null; free -h | head -2; df -h / | tail -1; ls /home/skanda/ 2>/dev/null\")",
+      "Bash(pnpm build:*)",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"mkdir -p /home/skanda/krishi-connect\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cd /home/skanda/krishi-connect/apps/server && pnpm exec prisma generate 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cd /home/skanda/krishi-connect/apps/server && pnpm exec prisma db push 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"sudo -u postgres psql -c \\\\\"ALTER USER krishi WITH PASSWORD 'krishi_prod_2026';\\\\\" 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"sudo grep -E '^local|^host' /etc/postgresql/16/main/pg_hba.conf\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"PGPASSWORD=krishi_prod_2026 psql -U krishi -h 127.0.0.1 -d krishi_connect -c 'SELECT 1;' 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cat /home/skanda/krishi-connect/apps/server/.env | grep DATABASE_URL\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cp /home/skanda/krishi-connect/.env /home/skanda/krishi-connect/apps/server/.env\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cd /home/skanda/krishi-connect/apps/server && pnpm exec prisma db push --accept-data-loss 2>&1 | grep -E 'applied|pushed|error|Error'\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cd /home/skanda/krishi-connect/apps/server && npx tsc --outDir dist 2>&1 | tail -5\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cd /home/skanda/krishi-connect && npx tsx apps/server/src/index.ts &>/tmp/krishi-test.log & sleep 3 && cat /tmp/krishi-test.log && kill %1 2>/dev/null\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"cat /tmp/krishi-test.log 2>/dev/null; cd /home/skanda/krishi-connect && pm2 start 'npx tsx apps/server/src/index.ts' --name krishi-server --cwd /home/skanda/krishi-connect 2>&1 && sleep 5 && pm2 logs krishi-server --lines 10 --nostream 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"pm2 delete krishi-server 2>/dev/null; which npx; ls /home/skanda/krishi-connect/node_modules/.bin/tsx 2>/dev/null; /home/skanda/krishi-connect/node_modules/.bin/tsx --version 2>/dev/null\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"find /home/skanda/krishi-connect/node_modules -name 'tsx' -type f 2>/dev/null | head -5\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"sleep 3 && pm2 logs krishi-server --lines 20 --nostream 2>&1\")",
+      "Bash(ssh -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" skanda@57.151.105.127 \"pm2 describe krishi-server 2>&1 | head -30\")",
+      "Bash(ssh -i:*)",
+      "Bash(tar -czf /tmp/krishi-web-dist.tgz dist/)",
+      "Bash(scp -i \"C:/Users/Sourabha/Downloads/skanda-vm_key \\(1\\).pem\" /tmp/krishi-web-dist.tgz skanda@57.151.105.127:/home/skanda/krishi-web-dist.tgz)"
     ]
   }
 }
