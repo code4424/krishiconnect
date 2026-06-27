@@ -1,0 +1,25 @@
+{
+  "name": "krishi-connect-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Krishi Connect - Agricultural Services & E-commerce Platform",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "db:migrate": "pnpm --filter server db:migrate",
+    "db:seed": "pnpm --filter server db:seed",
+    "db:push": "pnpm --filter server db:push",
+    "db:generate": "pnpm --filter server db:generate"
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.0",
+    "typescript": "^5.4.3"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  }
+}

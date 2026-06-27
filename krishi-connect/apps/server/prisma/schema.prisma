@@ -1,0 +1,394 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SERVICE_PROVIDER
+  FARMER
+}
+
+enum Language {
+  EN
+  KN
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ServiceCategory {
+  TRACTOR
+  LABOR
+  EQUIPMENT
+  IRRIGATION
+  HARVESTING
+  SPRAYING
+  ROTAVATOR
+  WATER_TANKER
+}
+
+enum RateType {
+  PER_HOUR
+  PER_DAY
+  PER_TRIP
+  PER_ACRE
+}
+
+enum BookingStatus {
+  REQUESTED
+  ACCEPTED
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  UPI_ONLINE
+  CASH
+  CARD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+}
+
+enum ProductCategory {
+  SEEDS
+  FERTILIZERS
+  PESTICIDES
+  TOOLS
+  IRRIGATION
+  EQUIPMENT
+}
+
+enum OrderStatus {
+  PLACED
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum NotificationType {
+  BOOKING
+  ORDER
+  PAYMENT
+  APPROVAL
+  SYSTEM
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  phone             String   @unique
+  password          String
+  role              Role
+  firstName         String   @map("first_name")
+  lastName          String   @map("last_name")
+  profileImage      String?  @map("profile_image")
+  isActive          Boolean  @default(true) @map("is_active")
+  isVerified        Boolean  @default(false) @map("is_verified")
+  preferredLanguage Language @default(EN) @map("preferred_language")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  providerProfile ProviderProfile?
+  farmerProfile   FarmerProfile?
+  notifications   Notification[]
+  payments        Payment[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+  @@map("users")
+}
+
+model ProviderProfile {
+  id                String         @id @default(cuid())
+  userId            String         @unique @map("user_id")
+  businessName      String         @map("business_name")
+  serviceCategories String[]       @map("service_categories")
+  experience        Int
+  address           String
+  city              String
+  state             String
+  pincode           String
+  latitude          Float
+  longitude         Float
+  serviceRadius     Int            @default(25) @map("service_radius")
+  aadharCard        String?        @map("aadhar_card")
+  panCard           String?        @map("pan_card")
+  drivingLicense    String?        @map("driving_license")
+  bankDetails       Json?          @map("bank_details")
+  approvalStatus    ApprovalStatus @default(PENDING) @map("approval_status")
+  rejectionReason   String?        @map("rejection_reason")
+  averageRating     Float          @default(0) @map("average_rating")
+  totalReviews      Int            @default(0) @map("total_reviews")
+  isOnline          Boolean        @default(false) @map("is_online")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  services Service[]
+  bookings Booking[]
+  products Product[]
+  reviews  Review[]
+
+  @@index([latitude, longitude])
+  @@index([city])
+  @@map("provider_profiles")
+}
+
+model FarmerProfile {
+  id            String   @id @default(cuid())
+  userId        String   @unique @map("user_id")
+  farmSize      Float?   @map("farm_size")
+  farmAddress   String?  @map("farm_address")
+  city          String
+  state         String
+  pincode       String
+  latitude      Float
+  longitude     Float
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings  Booking[]
+  orders    Order[]
+  reviews   Review[]
+  addresses Address[]
+
+  @@map("farmer_profiles")
+}
+
+model Address {
+  id              String   @id @default(cuid())
+  farmerId        String   @map("farmer_id")
+  name            String
+  phone           String
+  addressLine     String   @map("address_line")
+  city            String
+  state           String
+  pincode         String
+  isDefault       Boolean  @default(false) @map("is_default")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  farmer FarmerProfile @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Service {
+  id            String          @id @default(cuid())
+  providerId    String          @map("provider_id")
+  category      ServiceCategory
+  name          String
+  description   String
+  capacity      String?
+  rateType      RateType        @map("rate_type")
+  price         Decimal         @db.Decimal(10, 2)
+  discountPrice Decimal?        @map("discount_price") @db.Decimal(10, 2)
+  fuelType      String?         @map("fuel_type")
+  images        String[]
+  isActive      Boolean         @default(true) @map("is_active")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  provider ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  reviews  Review[]
+
+  @@index([providerId])
+  @@index([category])
+  @@index([isActive])
+  @@map("services")
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  bookingId          String        @unique @default(dbgenerated("generate_booking_id()")) @map("booking_id")
+  farmerId           String        @map("farmer_id")
+  serviceId          String        @map("service_id")
+  providerId         String        @map("provider_id")
+  bookingDate        DateTime      @map("booking_date")
+  startTime          String        @map("start_time")
+  duration           String
+  status             BookingStatus @default(REQUESTED)
+  totalAmount        Decimal       @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod      PaymentMethod @map("payment_method")
+  paymentStatus      PaymentStatus @default(PENDING) @map("payment_status")
+  cancellationReason String?       @map("cancellation_reason")
+  providerNotes      String?       @map("provider_notes")
+  farmerNotes        String?       @map("farmer_notes")
+  createdAt          DateTime      @default(now()) @map("created_at")
+  updatedAt          DateTime      @updatedAt @map("updated_at")
+
+  farmer    FarmerProfile     @relation(fields: [farmerId], references: [id])
+  service   Service           @relation(fields: [serviceId], references: [id])
+  provider  ProviderProfile   @relation(fields: [providerId], references: [id])
+  tracking  BookingTracking[]
+  payments  Payment[]
+  reviews   Review[]
+
+  @@index([farmerId])
+  @@index([providerId])
+  @@index([status])
+  @@index([bookingDate])
+  @@map("bookings")
+}
+
+model BookingTracking {
+  id          String   @id @default(cuid())
+  bookingId   String   @map("booking_id")
+  status      String
+  timestamp   DateTime @default(now())
+  description String
+  latitude    Float?
+  longitude   Float?
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("booking_trackings")
+}
+
+model Product {
+  id             String         @id @default(cuid())
+  providerId     String         @map("provider_id")
+  name           String
+  description    String
+  category       ProductCategory
+  brand          String?
+  price          Decimal        @db.Decimal(10, 2)
+  stock          Int
+  unit           String?
+  deliveryRange  Int?           @map("delivery_range")
+  images         String[]
+  approvalStatus ApprovalStatus @default(PENDING) @map("approval_status")
+  isActive       Boolean        @default(true) @map("is_active")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+  reviews    Review[]
+
+  @@index([providerId])
+  @@index([category])
+  @@index([approvalStatus])
+  @@map("products")
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderId         String        @unique @default(dbgenerated("generate_order_id()")) @map("order_id")
+  farmerId        String        @map("farmer_id")
+  status          OrderStatus   @default(PLACED)
+  subtotal           Decimal       @db.Decimal(10, 2)
+  deliveryCharges    Decimal       @default(0) @map("delivery_charges") @db.Decimal(10, 2)
+  convenienceCharges Decimal       @default(0) @map("convenience_charges") @db.Decimal(10, 2)
+  platformCharges    Decimal       @default(0) @map("platform_charges") @db.Decimal(10, 2)
+  totalAmount        Decimal       @map("total_amount") @db.Decimal(10, 2)
+  paymentMethod   PaymentMethod @map("payment_method")
+  paymentStatus   PaymentStatus @default(PENDING) @map("payment_status")
+  deliveryAddress Json          @map("delivery_address")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  farmer     FarmerProfile @relation(fields: [farmerId], references: [id])
+  items      OrderItem[]
+  payments   Payment[]
+
+  @@index([farmerId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String  @id @default(cuid())
+  orderId    String  @map("order_id")
+  productId  String  @map("product_id")
+  quantity   Int
+  unitPrice  Decimal @map("unit_price") @db.Decimal(10, 2)
+  totalPrice Decimal @map("total_price") @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  farmerId   String   @map("farmer_id")
+  providerId String   @map("provider_id")
+  serviceId  String?  @map("service_id")
+  productId  String?  @map("product_id")
+  bookingId  String?  @map("booking_id")
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  farmer   FarmerProfile   @relation(fields: [farmerId], references: [id])
+  provider ProviderProfile @relation(fields: [providerId], references: [id])
+  service  Service?        @relation(fields: [serviceId], references: [id])
+  product  Product?        @relation(fields: [productId], references: [id])
+  booking  Booking?        @relation(fields: [bookingId], references: [id])
+
+  @@map("reviews")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  userId        String        @map("user_id")
+  bookingId     String?       @map("booking_id")
+  orderId       String?       @map("order_id")
+  amount        Decimal       @db.Decimal(10, 2)
+  method        PaymentMethod
+  status        PaymentStatus
+  transactionId String?       @map("transaction_id")
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  booking Booking? @relation(fields: [bookingId], references: [id])
+  order   Order?   @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+model PlatformSettings {
+  id                    String   @id @default("default")
+  deliveryFee           Decimal  @default(60) @map("delivery_fee") @db.Decimal(10, 2)
+  freeDeliveryThreshold Decimal  @default(500) @map("free_delivery_threshold") @db.Decimal(10, 2)
+  convenienceCharges    Decimal  @default(0) @map("convenience_charges") @db.Decimal(10, 2)
+  platformCharges       Decimal  @default(0) @map("platform_charges") @db.Decimal(10, 2)
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  title     String
+  message   String
+  type      NotificationType
+  isRead    Boolean          @default(false) @map("is_read")
+  metadata  Json?
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}

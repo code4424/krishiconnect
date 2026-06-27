@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(grep -E \"^.*src/\\(app|server|index\\)\\\\.ts$\")",
+      "Bash(xargs ls:*)",
+      "Bash(node -e \"const rdp = require\\('react-day-picker'\\); console.log\\(Object.keys\\(rdp\\).filter\\(k => k.includes\\('DayPicker'\\) || k === 'UI'\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(node -e \"const rdp = require\\('react-day-picker'\\); console.log\\(JSON.stringify\\(rdp.UI, null, 2\\)\\)\")"
+    ]
+  }
+}
